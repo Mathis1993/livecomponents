@@ -7,7 +7,7 @@ from myapp.views import (
     nestedcounter,
     registration,
     simplecounter,
-    uploads,
+    uploads, interactivelist,
 )
 
 urlpatterns = [
@@ -19,5 +19,6 @@ urlpatterns = [
     path("registration/", registration, name="registration"),
     path("uploads/", uploads, name="uploads"),
     path("chart/", chart, name="chart"),
+    path("interactivelist/", interactivelist, name="interactivelist"),
     path("livecomponents/", include("livecomponents.urls")),
 ]

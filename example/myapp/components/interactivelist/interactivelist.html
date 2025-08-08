@@ -1,0 +1,29 @@
+{% load livecomponents component_tags %}
+
+<div {% component_attrs component_id %}>
+  <div style="display: flex; align-items: center; gap: 20px;">
+    <button style="width: 200px"
+            hx-post="{% call_command component_id 'fetch_item' %}"
+            {% if no_more_items %}disabled{% endif %}>
+      {% slot "fetch_button_text" %}{% endslot %}
+    </button>
+    {% if no_more_items %}
+      <div style="margin-bottom: 20px">
+        {% slot "no_more_items_text" %}{% endslot %}
+      </div>
+    {% endif %}
+  </div>
+  {% for item in visible_items %}
+    <div style="display: flex; align-items: center; justify-content: space-between;">
+      <p>{{ item.text }}</p>
+      <button style="width: 120px;"
+              hx-post="{% call_command component_id 'remove_item' %}"
+              hx-vals='{"item_id": "{{ item.id }}"}'>Remove
+      </button>
+    </div>
+    {% empty %}
+    <div class="text-secondary">
+      {% slot "empty_text" %}{% endslot %}
+    </div>
+  {% endfor %}
+</div>

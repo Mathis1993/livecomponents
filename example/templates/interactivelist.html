@@ -1,0 +1,22 @@
+{% extends "base.html" %}
+{% load livecomponents component_tags %}
+
+{% block body %}
+
+  <h1>Interactive list</h1>
+  <p>
+    Some exemplary reasons to consider Mathis.
+  </p>
+  {% livecomponent_block "interactivelist" items=items %}
+    {% fill "fetch_button_text" %}
+      Fetch reason!
+    {% endfill %}
+    {% fill "empty_text" %}
+      No reasons fetched yet.
+    {% endfill %}
+    {% fill "no_more_items_text" %}
+      Unlock more reasons in a personal conversation!
+    {% endfill %}
+  {% endlivecomponent_block %}
+
+{% endblock %}

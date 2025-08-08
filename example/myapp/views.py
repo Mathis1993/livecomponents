@@ -2,6 +2,8 @@ from django.http import HttpRequest
 from django.shortcuts import render
 from pydantic import BaseModel
 
+from myapp.domain import Item
+
 
 class SampleUser(BaseModel):
     username: str
@@ -56,3 +58,13 @@ def uploads(request: HttpRequest):
 
 def chart(request: HttpRequest):
     return render(request, "chart.html")
+
+def interactivelist(request: HttpRequest):
+    items = [
+        Item(id="1", text="He loves your live components."),
+        Item(id="2", text="He is a big fan of Django."),
+        Item(id="3", text="He always seeks to improve his skills."),
+        Item(id="4", text="He is highly motivated to build great applications."),
+        Item(id="5", text="He has experience in htmx."),
+    ]
+    return render(request, "interactivelist.html", {"items": items})
