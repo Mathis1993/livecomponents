@@ -8,3 +8,14 @@ site/
 dist
 db.sqlite3
 dump.rdb
+
+# Byte-compiled / optimized / DLL files #
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Pycharm
+.idea/
+
+# OSX #
+.DS_Store
