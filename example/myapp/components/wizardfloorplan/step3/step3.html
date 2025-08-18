@@ -2,7 +2,7 @@
 {% component_ancestor component_id "wizardfloorplan/root" as root_id %}
 
 <div {% component_attrs component_id %}>
-  <form hx-post="{% call_command root_id "finish_step3" %}">
+  <form hx-post="{% call_command root_id 'finish_step3' %}">
     <div>
       {{ step3_form.as_p }}
     </div>

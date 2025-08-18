@@ -2,7 +2,7 @@
 {% component_ancestor component_id "wizardfloorplan/root" as root_id %}
 
 <div {% component_attrs component_id %}>
-  <form hx-post="{% call_command root_id "update_price" %}"
+  <form hx-post="{% call_command root_id 'update_price' %}"
         hx-trigger="input"
         novalidate>
     <div>
@@ -10,13 +10,13 @@
     </div>
   </form>
   {% if resolution_form %}
-    <form hx-post="{% call_command root_id "update_price" %}"
+    <form hx-post="{% call_command root_id 'update_price' %}"
           hx-trigger="change">
       <div>
         <label for="id_resolution">{{ resolution_form.resolution.label_tag }}</label>
         <select id="id_resolution"
                 name="resolution"
-                hx-post="{% call_command root_id "update_price" %}"
+                hx-post="{% call_command root_id 'update_price' %}"
                 hx-trigger="change">
           {% for value, label in resolution_form.fields.resolution.choices %}
             <option value="{{ value }}"
@@ -26,7 +26,7 @@
       </div>
     </form>
   {% endif %}
-  <form hx-post="{% call_command root_id "finish_step2" %}">
+  <form hx-post="{% call_command root_id 'finish_step2' %}">
     <div>
       {{ step2_form.as_p }}
     </div>
