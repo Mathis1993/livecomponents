@@ -68,3 +68,6 @@ def interactivelist(request: HttpRequest):
         Item(id="5", text="He has experience in htmx."),
     ]
     return render(request, "interactivelist.html", {"items": items})
+
+def wizardfloorplan(request: HttpRequest):
+    return render(request, "wizardfloorplan.html", {})

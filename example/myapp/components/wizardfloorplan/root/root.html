@@ -1,0 +1,23 @@
+{% load livecomponents %}
+
+<div {% component_attrs component_id %}>
+  {% if not finished %}
+  <div style="margin-bottom:20px;">
+    {% livecomponent "wizardfloorplan/navigation" parent_id=component_id %}
+  </div>
+  <div style="margin-bottom:20px;">
+    {% livecomponent "wizardfloorplan/price" parent_id=component_id %}
+  </div>
+  {% if step == 1 %}
+    {% livecomponent "wizardfloorplan/step1" parent_id=component_id %}
+  {% elif step == 2 %}
+    {% livecomponent "wizardfloorplan/step2" parent_id=component_id %}
+  {% elif step == 3 %}
+    {% livecomponent "wizardfloorplan/step3" parent_id=component_id %}
+  {% endif %}
+  {% else %}
+    <div style="text-align: center; margin-top: 20px;">
+      <p>Order Placed Successfully!</p>
+    </div>
+  {% endif %}
+</div>
