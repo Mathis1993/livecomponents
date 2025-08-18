@@ -1,4 +1,5 @@
-from typing import Any, Optional, Union
+from typing import Any, Union
+
 from django import forms
 from django_components import component
 
@@ -9,7 +10,6 @@ from livecomponents import (
     InitStateContext,
     LiveComponentsModel,
 )
-
 from livecomponents import LiveComponent
 from myapp.models import FloorPlanOrder
 

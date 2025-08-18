@@ -1,5 +1,5 @@
-from typing import Any
 from django_components import component
+
 from livecomponents import StatelessLiveComponent
 
 
