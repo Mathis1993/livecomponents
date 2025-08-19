@@ -1,0 +1,6 @@
+{% load livecomponents %}
+{% component_ancestor component_id "wizardfloorplan/root" as root_id %}
+
+<div {% component_attrs component_id %}>
+  Current price: {{ floor_plan_order.total_price }}€ ({{ floor_plan_order.unit_price }}€ per plan)
+</div>

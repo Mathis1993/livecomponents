@@ -1,0 +1,16 @@
+{% load livecomponents %}
+{% component_ancestor component_id "wizardfloorplan/root" as root_id %}
+
+<div {% component_attrs component_id %}>
+  <form hx-post="{% call_command root_id 'edit_step2' %}"
+    hx-trigger="change, input"
+    novalidate>
+    <div>
+      {{ step2_form }}
+    </div>
+  </form>
+  <button hx-post="{% call_command root_id 'set_step' %}"
+          hx-vals='{"step": 3}'
+          style="margin-top: 1rem; width: 150px;">Continue
+  </button>
+</div>
