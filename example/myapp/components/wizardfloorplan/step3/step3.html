@@ -2,12 +2,14 @@
 {% component_ancestor component_id "wizardfloorplan/root" as root_id %}
 
 <div {% component_attrs component_id %}>
-  <form hx-post="{% call_command root_id 'finish_step3' %}">
+  <form hx-post="{% call_command root_id 'edit_step3' %}"
+        hx-trigger="change">
     <div>
-      {{ step3_form.as_p }}
+      {{ step3_form }}
     </div>
-    <button type="submit"
-            style="margin-top: 1rem; width: 150px;">Place Order
+    <button hx-post="{% call_command root_id 'finalize' %}"
+            style="margin-top: 1rem; width: 150px;">
+      Place Order
     </button>
   </form>
 </div>

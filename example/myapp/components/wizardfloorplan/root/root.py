@@ -14,32 +14,28 @@ from livecomponents import LiveComponent
 from myapp.models import FloorPlanOrder
 
 
-class QuantityForm(forms.ModelForm):
+class Step1Form(forms.ModelForm):
     class Meta:
         model = FloorPlanOrder
-        fields = ["quantity"]
+        fields = ["dimension"]
 
-    quantity = forms.IntegerField(min_value=1)
-
-
-class ResolutionForm(forms.ModelForm):
-    class Meta:
-        model = FloorPlanOrder
-        fields = ["resolution"]
-
-    resolution = forms.ChoiceField(
-        choices=FloorPlanOrder.Resolution.choices,
+    dimension = forms.ChoiceField(
+        choices=FloorPlanOrder.Dimension.choices,
         required=True,
-        widget=forms.Select,
-        label="Resolution",
+        widget=forms.RadioSelect,
     )
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields["dimension"].widget.attrs.update({"class": "form-check-input"})
 
 
 class Step2Form2D(forms.ModelForm):
     class Meta:
         model = FloorPlanOrder
-        fields = ["show_furniture"]
+        fields = ["quantity", "resolution", "show_furniture"]
 
+    quantity = forms.IntegerField(min_value=1)
     show_furniture = forms.BooleanField(
         required=False,
         widget=forms.CheckboxInput(attrs={"role": "switch"}),
@@ -49,8 +45,9 @@ class Step2Form2D(forms.ModelForm):
 class Step2Form3D(forms.ModelForm):
     class Meta:
         model = FloorPlanOrder
-        fields = ["furniture_style", "show_measurements"]
+        fields = ["quantity", "furniture_style", "show_measurements"]
 
+    quantity = forms.IntegerField(min_value=1)
     furniture_style = forms.ChoiceField(
         choices=FloorPlanOrder.FurnitureStyle.choices,
         required=True,
@@ -79,9 +76,21 @@ class Step3Form(forms.ModelForm):
 
     def clean_postcode(self):
         postcode = self.cleaned_data.get("postcode", "")
+        if not postcode:
+            return postcode
         if not postcode.isdigit() or len(postcode) != 5:
             raise forms.ValidationError("Postcode must be a 5-digit number.")
         return postcode
+
+
+class Step3FormOptionalFields(Step3Form):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields["customer_first_name"].required = False
+        self.fields["customer_last_name"].required = False
+        self.fields["street"].required = False
+        self.fields["postcode"].required = False
+        self.fields["city"].required = False
 
 
 class RootState(LiveComponentsModel):
@@ -89,24 +98,12 @@ class RootState(LiveComponentsModel):
     highest_step_visited: int = 1
     finished: bool = False
     floor_plan_order: FloorPlanOrder
-    quantity_form: QuantityForm | None = None
-    resolution_form: ResolutionForm | None = None
     step2_form_class: type[Union[Step2Form2D, Step2Form3D]] | None = None
     step2_form: Union[Step2Form2D, Step2Form3D] | None = None
-    step3_form: Step3Form | None = None
-
-    def init_quantity_form(self):
-        self.quantity_form = QuantityForm(instance=self.floor_plan_order)
-
-    def init_resolution_form(self):
-        if self.floor_plan_order.dimension == FloorPlanOrder.Dimension.THREE_DIMENSIONAL:
-            self.resolution_form = None
-        else:
-            self.resolution_form = ResolutionForm(instance=self.floor_plan_order)
+    step3_form: Union[Step3Form, Step3FormOptionalFields] | None = None
 
     def init_step2_form(self):
         if self.floor_plan_order.dimension == FloorPlanOrder.Dimension.TWO_DIMENSIONAL:
-            self.init_resolution_form()
             self.step2_form_class = Step2Form2D
             self.step2_form = Step2Form2D(instance=self.floor_plan_order)
         elif self.floor_plan_order.dimension == FloorPlanOrder.Dimension.THREE_DIMENSIONAL:
@@ -114,7 +111,7 @@ class RootState(LiveComponentsModel):
             self.step2_form = Step2Form3D(instance=self.floor_plan_order)
 
     def init_step3_form(self):
-        self.step3_form = Step3Form(instance=self.floor_plan_order)
+        self.step3_form = Step3FormOptionalFields(instance=self.floor_plan_order)
 
 
 @component.register("wizardfloorplan/root")
@@ -147,31 +144,29 @@ class RootComponent(LiveComponent[RootState]):
         return RootState(**context.component_kwargs)
 
     @command
-    def finish_step1(self, call_context: CallContext[RootState], dimension: str):
+    def edit_step1(self, call_context: CallContext[RootState], dimension: str):
         state = call_context.state
         state.floor_plan_order.dimension = dimension
-        state.init_quantity_form()
-        state.init_resolution_form()
-        state.init_step2_form()
-        state.step = 2
-        state.highest_step_visited = max(state.highest_step_visited, 2)
 
     @command
-    def finish_step2(self, call_context: CallContext[RootState], **kwargs):
+    def edit_step2(self, call_context: CallContext[RootState], **kwargs):
         state = call_context.state
         state.step2_form = state.step2_form_class(instance=state.floor_plan_order, data=kwargs)
         if state.step2_form.is_valid():
             state.floor_plan_order = state.step2_form.save(commit=False)
-            state.init_step3_form()
-            state.step = 3
-            state.highest_step_visited = 3
 
     @command
-    def finish_step3(self, call_context: CallContext[RootState], **kwargs):
+    def edit_step3(self, call_context: CallContext[RootState], **kwargs):
+        state = call_context.state
+        state.step3_form = Step3FormOptionalFields(instance=state.floor_plan_order, data=kwargs)
+        if state.step3_form.is_valid():
+            state.floor_plan_order = state.step3_form.save(commit=False)
+
+    @command
+    def finalize(self, call_context: CallContext[RootState], **kwargs):
         state = call_context.state
         state.step3_form = Step3Form(instance=state.floor_plan_order, data=kwargs)
         if state.step3_form.is_valid():
-            state.floor_plan_order = state.step3_form.save(commit=False)
             state.finished = True
             state.floor_plan_order.save()
 
@@ -181,17 +176,8 @@ class RootComponent(LiveComponent[RootState]):
         if step < 1 or step > 3:
             raise ValueError("Step must be between 1 and 3.")
         if step == 2:
-            state.init_resolution_form()
+            state.init_step2_form()
+        if step == 3:
+            state.init_step3_form()
         state.step = step
-
-    @command
-    def update_price(self, call_context: CallContext[RootState], **kwargs):
-        state = call_context.state
-        if "quantity" in kwargs:
-            state.quantity_form = QuantityForm(instance=state.floor_plan_order, data=kwargs)
-            if state.quantity_form.is_valid():
-                state.floor_plan_order.quantity = state.quantity_form.cleaned_data["quantity"]
-        if "dimension" in kwargs:
-            state.floor_plan_order.dimension = kwargs["dimension"]
-        if "resolution" in kwargs:
-            state.floor_plan_order.resolution = kwargs["resolution"]
+        state.highest_step_visited = max(state.highest_step_visited, step)
