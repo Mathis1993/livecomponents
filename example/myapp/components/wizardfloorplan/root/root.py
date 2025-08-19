@@ -2,32 +2,15 @@ from typing import Any, Union
 
 from django import forms
 from django_components import component
-
 from livecomponents import (
     CallContext,
-    command,
     ExtraContextRequest,
     InitStateContext,
+    LiveComponent,
     LiveComponentsModel,
+    command,
 )
-from livecomponents import LiveComponent
 from myapp.models import FloorPlanOrder
-
-
-class Step1Form(forms.ModelForm):
-    class Meta:
-        model = FloorPlanOrder
-        fields = ["dimension"]
-
-    dimension = forms.ChoiceField(
-        choices=FloorPlanOrder.Dimension.choices,
-        required=True,
-        widget=forms.RadioSelect,
-    )
-
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        self.fields["dimension"].widget.attrs.update({"class": "form-check-input"})
 
 
 class Step2Form2D(forms.ModelForm):
@@ -62,7 +45,14 @@ class Step2Form3D(forms.ModelForm):
 class Step3Form(forms.ModelForm):
     class Meta:
         model = FloorPlanOrder
-        fields = ["customer_first_name", "customer_last_name", "street", "postcode", "city", "country"]
+        fields = [
+            "customer_first_name",
+            "customer_last_name",
+            "street",
+            "postcode",
+            "city",
+            "country",
+        ]
         labels = {
             "customer_first_name": "First Name",
             "customer_last_name": "Last Name",
@@ -106,7 +96,10 @@ class RootState(LiveComponentsModel):
         if self.floor_plan_order.dimension == FloorPlanOrder.Dimension.TWO_DIMENSIONAL:
             self.step2_form_class = Step2Form2D
             self.step2_form = Step2Form2D(instance=self.floor_plan_order)
-        elif self.floor_plan_order.dimension == FloorPlanOrder.Dimension.THREE_DIMENSIONAL:
+        elif (
+            self.floor_plan_order.dimension
+            == FloorPlanOrder.Dimension.THREE_DIMENSIONAL
+        ):
             self.step2_form_class = Step2Form3D
             self.step2_form = Step2Form3D(instance=self.floor_plan_order)
 
@@ -119,7 +112,7 @@ class RootComponent(LiveComponent[RootState]):
     template_name = "wizardfloorplan/root/root.html"
 
     def get_extra_context_data(
-            self, extra_context_request: ExtraContextRequest[RootState]
+        self, extra_context_request: ExtraContextRequest[RootState]
     ) -> dict[str, Any]:
         return {
             "steps": ["Step 1", "Step 2", "Step 3"],
@@ -151,14 +144,18 @@ class RootComponent(LiveComponent[RootState]):
     @command
     def edit_step2(self, call_context: CallContext[RootState], **kwargs):
         state = call_context.state
-        state.step2_form = state.step2_form_class(instance=state.floor_plan_order, data=kwargs)
+        state.step2_form = state.step2_form_class(
+            instance=state.floor_plan_order, data=kwargs
+        )
         if state.step2_form.is_valid():
             state.floor_plan_order = state.step2_form.save(commit=False)
 
     @command
     def edit_step3(self, call_context: CallContext[RootState], **kwargs):
         state = call_context.state
-        state.step3_form = Step3FormOptionalFields(instance=state.floor_plan_order, data=kwargs)
+        state.step3_form = Step3FormOptionalFields(
+            instance=state.floor_plan_order, data=kwargs
+        )
         if state.step3_form.is_valid():
             state.floor_plan_order = state.step3_form.save(commit=False)
 
