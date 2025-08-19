@@ -2,7 +2,8 @@
 {% component_ancestor component_id "wizardfloorplan/root" as root_id %}
 
 <div {% component_attrs component_id %}>
-  <form>
+  <form hx-post="{% call_command root_id 'edit_step1' %}"
+        hx-trigger="change">
     <fieldset>
       <legend>Choose an option:</legend>
       <div style="display: flex; gap: 1rem;">
@@ -10,9 +11,7 @@
                id="option2d"
                name="dimension"
                value={{ dimension_2D }} hidden
-               {% if floor_plan_order.dimension == dimension_2D %}checked{% endif %}
-               hx-post="{% call_command root_id 'edit_step1' %}"
-               hx-trigger="change">
+               {% if floor_plan_order.dimension == dimension_2D %}checked{% endif %}>
         <label for="option2d"
                style="cursor:pointer; display: flex; flex-direction: column; align-items: center; justify-content: center;">
           <i class="fa-solid fa-house"></i>
@@ -23,9 +22,7 @@
                id="option3d"
                name="dimension"
                value={{ dimension_3D }} hidden
-               {% if floor_plan_order.dimension == dimension_3D %}checked{% endif %}
-               hx-post="{% call_command root_id 'edit_step1' %}"
-               hx-trigger="change">
+               {% if floor_plan_order.dimension == dimension_3D %}checked{% endif %}>
         <label for="option3d"
                style="cursor:pointer; display: flex; flex-direction: column; align-items: center; justify-content: center;">
           <i class="fa-solid fa-building"></i>
@@ -48,7 +45,6 @@
     border-radius: 0.5rem;
     padding: 0.5rem;
   }
-
   label {
     display: flex;
     flex-direction: column;
