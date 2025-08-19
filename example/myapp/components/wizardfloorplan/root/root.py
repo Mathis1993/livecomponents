@@ -137,7 +137,7 @@ class RootComponent(LiveComponent[RootState]):
         return RootState(**context.component_kwargs)
 
     @command
-    def edit_step1(self, call_context: CallContext[RootState], dimension: str):
+    def edit_step1(self, call_context: CallContext[RootState], dimension: FloorPlanOrder.Dimension):
         state = call_context.state
         state.floor_plan_order.dimension = dimension
 
