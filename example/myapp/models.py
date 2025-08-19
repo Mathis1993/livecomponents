@@ -21,20 +21,20 @@ class CoffeeBean(models.Model):
 
 class FloorPlanOrder(models.Model):
     class Dimension(models.TextChoices):
-        THREE_DIMENSIONAL = "3D", "3D"
         TWO_DIMENSIONAL = "2D", "2D"
+        THREE_DIMENSIONAL = "3D", "3D"
 
     class FurnitureStyle(models.TextChoices):
-        MODERN = "modern", "Modern"
         ARCHAIC = "archaic", "Archaic"
+        MODERN = "modern", "Modern"
 
     class Resolution(models.TextChoices):
         HD = "HD", "HD (1080p)"
         UHD = "UHD", "UHD (2160p)"
 
     class Country(models.TextChoices):
-        GERMANY = "germany", "Germany"
         AUSTRIA = "austria", "Austria"
+        GERMANY = "germany", "Germany"
         SWITZERLAND = "switzerland", "Switzerland"
 
     PRICE_2D = 29.0
